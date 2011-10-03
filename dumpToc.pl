@@ -97,7 +97,7 @@ sub readTocEntry
 	push @$toce, {oid=>ReadStr() +0};
 	push @$toce, {tag=>ReadStr()};
 	push @$toce, {desc=>ReadStr()};
-	push @$toce, {section=>$sections[ReadInt()]};
+	push @$toce, {section=>$sections[ReadInt() - 1]};
 	push @$toce, {defn=>ReadStr()};
 	push @$toce, {dropStmt=>ReadStr()};
 	push @$toce, {copyStmt=>ReadStr()};
