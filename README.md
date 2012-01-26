@@ -1,4 +1,4 @@
-# Dump Table of Contents of a PostgreSQL Custom FOrmat Dump File.
+# Dump Table of Contents of a PostgreSQL Custom Format Dump File.
 
 
 ``` dumpToc.pl [ --help | --format=format | --destdir=destdir ] [ [--dumpfile=]dumpfile ]
