@@ -17,11 +17,12 @@ use IO::Handle;
 use Getopt::Long;
 use File::Path qw(make_path);
 
-my ($format,$destdir,$dumpfile,$help);
+my ($format,$destdir,$dumpfile,$help, $tocfile);
 
 GetOptions ("format=s" => \$format, 
             "destdir=s" => \$destdir, 
             "dumpfile=s" => \$dumpfile,
+			"tocfile=s" => \$tocfile,
             "help" => \$help)
     || die "Bad options";
 
@@ -39,6 +40,10 @@ my $inh;
 my $runscript;
 my %fnames;
 
+if ($tocfile && $dumpfile)
+{
+	die "tocfile and dumpfile options are mutually exclusive";
+}
 
 if (@ARGV)
 {
@@ -46,9 +51,12 @@ if (@ARGV)
 	$dumpfile = shift(@ARGV);
 }
 
-if ($dumpfile)
+my $src = $dumpfile;
+$src ||= $tocfile;
+
+if ($src)
 {
-	open($inh,$dumpfile) || die "opening $dumpfile: $!";
+	open($inh,$src) || die "opening $src: $!";
 }
 else
 {
@@ -193,7 +201,14 @@ sub readTocEntry
 		push @$deps, $dep;
 	}
 
-	push @$toce, {extra_offset => ReadOffset()};
+    if ($globs{format} eq 'Custom')
+    {
+        push @$toce, {extra_offset => ReadOffset()};
+    }
+    else
+    {
+        push @$toce, {file_name => ReadStr()};
+    }
 
 	return $toce;
 
@@ -234,6 +249,6 @@ sub read_data
 sub help
 {
 
-	print STDERR "$0: [ --help | --format=format | --destdir=destdir ] [ [--dumpfile=]dumpfile ]\n";
+	print STDERR "$0: [ --help | --format=format | --destdir=destdir ] [ [--dumpfile=|--tocfile=]dump_or_toc_file ]\n";
 	exit 0;
 }
