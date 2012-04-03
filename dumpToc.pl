@@ -11,8 +11,6 @@ See accompanying LICENSE file for details.
 =cut
 
 use strict;
-use YAML;
-use Data::Dumper;
 use IO::Handle;
 use Getopt::Long;
 use File::Path qw(make_path);
@@ -63,15 +61,29 @@ else
 	$inh = IO::Handle->new_from_fd(fileno(STDIN),"r"); 
 }
 
-read_data();
-
+# load optional output modules
 if ($format eq 'YAML')
 {
-	print Dump($result);
+	require YAML;
 }
 elsif ($format eq 'Dumper')
 {
-	print Dumper($result);
+	require Data::Dumper;
+}
+
+# get the actual data
+# fills in @$result and @$toc
+
+read_data();
+
+# output the data
+if ($format eq 'YAML')
+{
+	print YAML::Dump($result);
+}
+elsif ($format eq 'Dumper')
+{
+	print Data::Dumper::Dumper($result);
 }
 else
 {
