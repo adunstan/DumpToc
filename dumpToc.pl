@@ -137,8 +137,6 @@ sub write_entry
 	print $runscript "\\i $fname\n";
 }
 
-
-
 sub ReadInt
 {
 	my $sign;
@@ -202,6 +200,8 @@ sub readTocEntry
 	push @$toce, {copyStmt=>ReadStr()};
 	push @$toce, {namespace=>ReadStr()};
 	push @$toce, {tablespace=>ReadStr()};
+	push @$toce, {tableam=>ReadStr()} if $globs{vmin} >= 14;
+	push @$toce, {relkind=>chr(ReadInt())} if $globs{vmin} >= 16;
 	push @$toce, {owner=>ReadStr()};
 	push @$toce, {withOids=>ReadStr()};
 	
@@ -239,7 +239,15 @@ sub read_data
 	sysread $inh,$byte,1; $globs{format} = $formats[unpack("C",$byte)];
 
 	push @$result, {magic=>$magic}, {meta=>\%globs};
-	push @$result, {compression=>ReadInt()};
+	if ($globs{vmin} >= 15)
+	{
+		sysread $inh,$byte,1;
+		push @$result, {compression=>unpack("C",$byte)};
+	}
+	else
+	{
+		push @$result, {compression=>ReadInt()};
+	}
 	push @$result, {sec=>ReadInt()};
 	push @$result, {min=>ReadInt()};
 	push @$result, {hour=>ReadInt()};
