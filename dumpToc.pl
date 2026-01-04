@@ -27,6 +27,7 @@ GetOptions ("format=s" => \$format,
 help() if $help;
 
 my @formats = qw(Unknown Custom Files Tar Null Directory);
+my @algs = qw(None Gzip Lz4 Zstd);
 my @sections = qw(None PreData Data PostData);
 my $result = [];
 my $toc = [];
@@ -201,7 +202,11 @@ sub readTocEntry
 	push @$toce, {namespace=>ReadStr()};
 	push @$toce, {tablespace=>ReadStr()};
 	push @$toce, {tableam=>ReadStr()} if $globs{vmin} >= 14;
-	push @$toce, {relkind=>chr(ReadInt())} if $globs{vmin} >= 16;
+	if ($globs{vmin} >= 16)
+	{
+		my $int = ReadInt();
+		push @$toce, {relkind=>chr($int)}  if $int;
+	}
 	push @$toce, {owner=>ReadStr()};
 	push @$toce, {withOids=>ReadStr()};
 	
@@ -242,11 +247,11 @@ sub read_data
 	if ($globs{vmin} >= 15)
 	{
 		sysread $inh,$byte,1;
-		push @$result, {compression=>unpack("C",$byte)};
+		push @$result, {compression_algorithm=>$algs[$byte]};
 	}
 	else
 	{
-		push @$result, {compression=>ReadInt()};
+		push @$result, {compression_gzip_level=>ReadInt()};
 	}
 	push @$result, {sec=>ReadInt()};
 	push @$result, {min=>ReadInt()};
